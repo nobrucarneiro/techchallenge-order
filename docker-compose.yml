@@ -1,0 +1,36 @@
+version: '3.5'
+services:
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ~/apps/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=g37_lanches
+    networks:
+      - lanches-network
+
+  lanches-api:
+    build: .
+    ports:
+      - 8080:8080
+    environment:
+      - ENVIRONMENT=dev
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=g37_lanches
+      - POSTGRES_SSLMODE=disable
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+    depends_on:
+      - postgres
+    restart: always  # Configuração para reiniciar sempre
+    networks:
+      - lanches-network
+
+networks:
+  lanches-network:
+    driver: bridge

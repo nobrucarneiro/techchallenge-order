@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lanches-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lanches-api
+  template:
+    metadata:
+      labels:
+        app: lanches-api
+    spec:
+      containers:
+        - name: lanches-api
+          image: 861319/lanches-api:1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ENVIRONMENT
+              value: dev
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_PORT
+              value: '5432'
+            - name: POSTGRES_SSLMODE
+              value: disable
+                
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
+            requests:
+              cpu: "0.25"
+              memory: "256Mi"

@@ -1,0 +1,574 @@
+openapi: 3.0.3
+info:
+  title: API de Realização de Pedidos e Pagamento de Lanches - g37-lanches
+  description: |- 
+    A API de Realização de Pedidos e Pagamento de Lanches, denominada "g37-lanches," oferece uma solução eficiente para a realização de pedidos e pagamento em uma lanchonete. Os clientes podem navegar pelo menu, escolher produtos individualmente, criar combos personalizados e efetuar o pagamento de forma simples e conveniente.
+
+    **Funcionalidades Principais:**
+
+    1. **Realização do Pedido e Pagamento:**
+       - Os clientes começam o processo de pedido utilizando o sistema de autoatendimento, onde podem selecionar produtos individualmente ou montar seus próprios combos.
+       - O sistema fornece informações detalhadas sobre os produtos, incluindo nome, imagem, descrição e preço.
+       - Os clientes têm a opção de adicionar produtos à sacola e, em seguida, prosseguir para o pagamento.
+       - O processo de pagamento inclui um resumo do pedido, a possibilidade de inserir cupons promocionais e fornecer informações de identificação para receber promoções.
+       - O pagamento é realizado por meio do aplicativo do Mercado Pago, com a leitura do QR Code.
+    
+    links úteis:
+    - [Repositório do Projeto ](https://github.com/IgorRamosBR/g37-techchallenge)
+    - [Documentação DDD](https://docs.google.com/document/d/1cOhK9ychHcw6xCaa9AuH9t98FAmcPHPYo1ob395zgKE/edit#heading=h.69nvor85beny)
+  version: 1.0.11
+servers:
+  - url: http://localhost:8080/v1/
+tags:
+  - name: customers
+    description: Operações sobre os clientes
+  - name: product
+    description: Operações sobre os produtos
+  - name: orders
+    description: Operações sobre as ordens de pedido e pagamento
+
+paths:
+  /customers:
+    post:
+      tags:
+        - customers
+      summary: Cadastrar cliente
+      operationId: createCustomer
+      requestBody:
+        description: Objeto do cliente criado
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Bruno
+                cpf:
+                  type: string
+                  example: '83397074690'
+                email:
+                  type: string
+                  example: bruno.carneiro@glive.com
+      responses:
+        '200':
+          description: 'OK'
+      
+    get:
+      tags:
+        - customers
+      summary: Buscar clientes através do CPF ou id
+      parameters:
+      - in: query
+        name: cpf
+        schema:
+          type: string
+          example: '83397074690'
+        required: false
+      - in: query
+        name: id
+        schema:
+          type: number
+          example: '1'
+        required: false
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    example: 1
+                  createdAt:
+                    type: string
+                    example: '2023-10-31T10:41:38.816861Z'
+                  updatedAt:
+                    type: string
+                    example: '2023-10-31T10:41:38.816861Z'
+                  name:
+                    type: string
+                    example: 'Bruno'
+                  cpf:
+                    type: string
+                    example: '83397074690'
+                  email:
+                    type: string
+                    example: 'bruno.carneiro@live.com'
+
+  
+  /product:
+    post:
+      tags:
+        - product
+      summary: Adicione um novo produto à loja
+      description: Adicione um novo produto à loja
+      operationId: createProduct
+      requestBody:
+        description: Crie um novo produto na loja
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Combo 4"
+                skuId:
+                  type: string
+                  example: "000006"
+                description:
+                  type: string
+                  example: "Lanche, acompanhamento e bebida sortida"
+                category:
+                  type: string
+                  example: "Combo"
+                price:
+                  type: number
+                  format: double
+                  example: 40.00
+      responses:
+        '200':
+          description: 'OK'
+          
+    get:
+      tags:
+        - product
+      summary: Buscar todos os produtos ou por categoria
+      description: Procurar um produto por categoria
+      operationId: GetProductsByCategory
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          example: 'Combo'
+        required: false
+      - in: query
+        name: limit
+        description: número de resultados por página
+        schema:
+          type: string
+          example: '50'
+        required: false
+      - in: query
+        name: offset
+        description: número no qual os resultados devem se iniciar
+        schema:
+          type: string
+          example: '40'
+        required: false
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        ID:
+                          type: integer
+                          example: 4
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+                        name:
+                          type: string
+                          example: 'Combo 4'
+                        skuId:
+                          type: string
+                          example: '000006'
+                        description:
+                          type: string
+                          example: 'Lanche, acompanhament e bebida sortida'
+                        category:
+                          type: string
+                          example: 'Combo'
+                        price:
+                          type: number
+                          example: 40
+                  next:
+                    type: number
+                    example: 1
+         
+
+  /product/{id}:
+    put:
+      tags:
+        - product
+      summary: Atualizar um produto existente
+      description: Atualizar produto existente por ID
+      operationId: updateProduct
+      parameters:
+        - name: id
+          in: path
+          description: ID do produto que será deletado 
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4
+      requestBody:
+        description: Atualizar um produto existente na loja
+        content:
+          application/json:
+            schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: "Batata frita"
+                  skuId:
+                    type: string
+                    example: "000001"
+                  description:
+                    type: string
+                    example: "Deliciosa batata frita"
+                  category:
+                    type: string
+                    example: "Acompanhamento"
+                  price:
+                    type: number
+                    format: double
+                    example: 16.00
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: "Batata frita"
+                  skuId:
+                    type: string
+                    example: "000001"
+                  description:
+                    type: string
+                    example: "Deliciosa batata frita"
+                  category:
+                    type: string
+                    example: "Acompanhamento"
+                  price:
+                    type: number
+                    format: double
+                    example: 16.00          
+    delete:
+      tags:
+        - product
+      summary: Deletar produto
+      description: Delete um produto
+      operationId: DeleteProduct por ID
+      parameters:
+        - name: id
+          in: path
+          description: Product ID a ser Deletado
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4
+      responses:
+        '200':
+          description: 'OK'
+  
+  
+  
+  
+  /orders:
+    post:
+      tags:
+        - orders
+      summary: Criar um pedido
+      description: Criar pedidos com itens unitários, combos prontos ou combos personalizados. Sendo que para os itens unitários e os combos prontos, a lista de productIds deverá conter apenas um único ID.
+      operationId: createOrdersCustom
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productIds:
+                        type: array
+                        items:
+                          type: integer
+                        example: [2, 3]
+                      quantity:
+                        type: integer
+                        example: 2
+                      type:
+                        type: string
+                        enum:
+                          - UNIT
+                          - COMBO
+                          - CUSTOM_COMBO
+                        example: "CUSTOM_COMBO"
+                customerId:
+                  type: integer
+                  example: 1
+                coupon:
+                  type: string
+                  example: "APP10"
+                status:
+                  type: string
+                  enum:
+                    - CREATED
+                  example: "CREATED"
+      responses:
+        '200':
+          description: 'OK'
+    
+    
+    
+    
+    get:
+      tags:
+        - orders
+      summary: Buscar pedidos cadastrados
+      description: Buscar todos os pedidos cadastrados
+      operationId: getAllOrders
+      parameters:
+      - in: query
+        name: limit
+        description: número de resultados por página
+        schema:
+          type: string
+          example: '50'
+        required: false
+      - in: query
+        name: offset
+        description: número no qual os resultados devem se iniciar
+        schema:
+          type: string
+          example: '30'
+        required: false
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        ID:
+                          type: number
+                          example: 1
+                        createdAt:
+                          type: string
+                          example: "2023-10-29T19:39:21.338373-03:00"
+                        updatedAt:
+                          type: string
+                          example: "2023-10-29T19:39:21.338373-03:00"
+                        items:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              ID:
+                                type: number
+                                example: 123
+                              createdAt:
+                                type: string
+                                example: "2023-10-29T19:39:21.338373-03:00"
+                              updatedAt:
+                                type: string
+                                example: "2023-10-29T19:39:21.338373-03:00"
+                              products:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    ID:
+                                      type: number
+                                      example: 2
+                                    createdAt:
+                                      type: string
+                                      example: "2023-10-29T19:39:21.338373-03:00"
+                                    updatedAt:
+                                      type: string
+                                      example: "2023-10-29T19:39:21.338373-03:00"
+                                    name:
+                                      type: string
+                                      example: "Nuggets"
+                                    skuId:
+                                      type: string
+                                      example: "000002"
+                                    description:
+                                      type: string
+                                      example: "Frango empanado"
+                                    category:
+                                      type: string
+                                      example: "Acompanhamento"
+                                    price:
+                                      type: number
+                                      example: 10.9
+                              quantity:
+                                type: integer
+                                example: 2
+                              type:
+                                type: string
+                                enum:
+                                  - UNIT
+                                  - COMBO
+                                  - CUSTOM_COMBO
+                                example: "UNIT"
+                        coupon:
+                          type: string
+                          example: "APP10"
+                        status:
+                          type: string
+                          enum:
+                            - CREATED
+                          example: "CREATED"
+                  next:
+                    type: number
+                    example: 1
+ 
+ 
+
+ 
+  /get/{id}/status:
+    get:
+      tags:
+        - orders
+      summary: Burcar status do pedido
+      description: Buscar pelo status do pedido através do seu respectivo id
+      operationId: GetOrderStatus
+      parameters:
+        - name: id
+          in: path
+          description: ID 
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4
+      responses:
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: "Batata frita"
+                  skuId:
+                    type: string
+                    example: "000001"
+                  description:
+                    type: string
+                    example: "Deliciosa batata frita"
+                  category:
+                    type: string
+                    example: "Acompanhamento"
+                  price:
+                    type: number
+                    format: double
+                    example: 16.00    
+    
+    
+    
+    
+  /orders/{id}/status: 
+   put:
+      tags:
+        - orders
+      summary: Atualizar status do pedido
+      description: Atualizar o status de um pedido através do seu id
+      operationId: updateOrder
+      parameters: 
+        - name: id
+          in: path
+          description: ID do pedido
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "CREATED|PAID|RECEIVED|IN_PROGRESS|READY|DONE"
+      responses:
+        '200':
+          description: 'OK'
+          
+  /orders/{id}/payment:
+    put:
+      tags:
+        - orders
+      summary: Atualizar pagamento de um pedido
+      description: Atualizar o pagamento de um pedido
+      operationId: CreateOrderPayment
+      parameters: 
+        - name: id
+          in: path
+          description: ID do pedido que terá o pagamento atualizado
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Id:
+                  type: string
+                  example: "1"
+                LiveMode:
+                  type: boolean
+                  example: true
+                Type:
+                  type: string
+                  example: "payment"
+                DateCreated:
+                  type: string
+                  example: "2024-01-29T12:00:00Z"
+                UserId:
+                  type: integer
+                  example: 1    
+                ApiVersion:
+                  type: string
+                  example: "v1"
+                Action:
+                  type: string
+                  example: "paymentAction"
+                Data:
+                  type: string
+                  example: "Id"                      
+      responses:
+        '200':
+          description: 'OK'

@@ -1,0 +1,16 @@
+{
+    "items": [
+      {
+        "productId": 1,
+        "quantity": 2,
+        "type": "UNIT"
+      },
+      {
+        "productId": 2,
+        "quantity": 1,
+        "type": "COMBO"
+      }
+    ],
+    "coupon": "SAVE10",
+    "customerCpf": "12345678909"
+  }
